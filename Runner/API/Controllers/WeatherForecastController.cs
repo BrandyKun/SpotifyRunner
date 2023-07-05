@@ -38,7 +38,7 @@ public class WeatherForecastController : ControllerBase
     [HttpPost, Route("Token")]
     public async Task<string> RequestToken()
     {
-        var token = await _spotifyService.GetToken(_config["spotify:client_id"], _config["Spotify:client_secret"]);
+        var token = await _spotifyService.GetToken(_config["Spotify:client_id"], _config["Spotify:client_secret"]);
         var gotThings = token;
         return "true";
     }
