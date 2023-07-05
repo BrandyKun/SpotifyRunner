@@ -1,3 +1,4 @@
+using Application.Interface;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -12,9 +13,13 @@ public class WeatherForecastController : ControllerBase
     };
 
     private readonly ILogger<WeatherForecastController> _logger;
+    private readonly ISpotifyLogin _spotifyService;
+    private readonly IConfiguration _config;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, ISpotifyLogin spotifyService, IConfiguration config)
     {
+        _config = config;
+        _spotifyService = spotifyService;
         _logger = logger;
     }
 
@@ -28,5 +33,13 @@ public class WeatherForecastController : ControllerBase
             Summary = Summaries[Random.Shared.Next(Summaries.Length)]
         })
         .ToArray();
+    }
+    
+    [HttpPost, Route("Token")]
+    public async Task<string> RequestToken()
+    {
+        var token = await _spotifyService.GetToken(_config["spotify:client_id"], _config["Spotify:client_secret"]);
+        var gotThings = token;
+        return "true";
     }
 }

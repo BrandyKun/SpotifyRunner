@@ -24,7 +24,7 @@ public class SpotifyLogin : ISpotifyLogin
 
             requestMessage.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}")));
             requestMessage.Content = new FormUrlEncodedContent(new Dictionary<string, string> {
-                {"grant-type", "client_credential"}
+                {"grant_type", "client_credential"}
             });
 
             var response = await _httpClient.SendAsync(requestMessage);
@@ -34,11 +34,11 @@ public class SpotifyLogin : ISpotifyLogin
 
             var authResult = await JsonSerializer.DeserializeAsync<Domain.Entities.AuthResult>(responseData);
 
-            return token = authResult.AccessToken;
+            token = authResult.AccessToken;
         }
         catch(HttpRequestException ex) 
         {
-
+            throw new HttpRequestException(ex.Message, ex);
         }
 
         return token;
