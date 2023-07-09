@@ -1,4 +1,6 @@
+using System.Net;
 using Application.Interface;
+using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -34,12 +36,19 @@ public class WeatherForecastController : ControllerBase
         })
         .ToArray();
     }
-    
+
     [HttpPost, Route("Token")]
     public async Task<string> RequestToken()
     {
         var token = await _spotifyService.GetToken(_config["Spotify:client_id"], _config["Spotify:client_secret"]);
         var gotThings = token;
         return "true";
+    }
+    [HttpGet, Route("authCode")]
+    public async Task<string> RequestAuthCode()
+    {
+        var token = await _spotifyService.GetAuthCodeAsync(_config["Spotify:client_id"], _config["Spotify:client_secret"]);
+        var gotThings = token.ToString();
+        return token;
     }
 }
