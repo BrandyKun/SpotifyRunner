@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using static IdentityModel.OidcConstants;
 
 namespace Infrastructure.Services;
 
@@ -17,6 +18,7 @@ public class SpotifyLogin : ISpotifyLogin
 
     private readonly string authCodeEndpoint = "https://accounts.spotify.com/authorize";
     private readonly string tokenEndpoint = "https://accounts.spotify.com/api/token";
+    const string redirectSign = "/auth/authcode";
 
     public SpotifyLogin(HttpClient httpClient)
     {
@@ -30,16 +32,13 @@ public class SpotifyLogin : ISpotifyLogin
         string urlParams = $"response_type=code&state=16&client_id={clientId}&redirect_uri=http://localhost:5039&scope={scopes}&show_dialog=true";
         HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{authCodeEndpoint}?{urlParams}");
 
-        HttpRequest
         var messageResponse = await _httpClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest()
         {
             Address = tokenEndpoint,
             ClientId = clientId,
             ClientSecret = clientSecret,
             Code = "16",
-            RedirectUri = "http://localhost:5039"
-            // Scope = scopes,
-            
+            RedirectUri = "http://localhost:5039"            
         });
 
 
@@ -92,6 +91,20 @@ public class SpotifyLogin : ISpotifyLogin
         return token;
     }
 
+
+    public string BuildUri(string clientId, string clientSecret, string uriPath)
+    {
+        string urlParams = $"response_type=code&state=16&client_id={clientId}&redirect_uri=http://localhost:5039&scope={scopes}&show_dialog=true";
+
+        UriBuilder builder = new UriBuilder(uriPath);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("response_type = code");
+        sb.Append("&state=16");
+        sb.Append($"&client_id={clientId}");
+        sb.Append($"&redirect_uri={Uri.EscapeUriString(builder.Uri.AbsoluteUri)}");
+        sb.Append($"&scope={scopes}");
+        return "";
+    }
 
 
 }
