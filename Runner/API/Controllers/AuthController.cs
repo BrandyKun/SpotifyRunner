@@ -10,10 +10,10 @@ namespace API.Controllers
             
         }
 
-        [HttpGet]
-        public ActionResult Authcode()
-        {
+        // [HttpGet]
+        // public ActionResult Authcode()
+        // {
             
-        }
+        // }
     }
 }
