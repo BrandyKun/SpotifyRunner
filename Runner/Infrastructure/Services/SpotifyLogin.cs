@@ -16,7 +16,7 @@ public class SpotifyLogin : ISpotifyLogin
     private readonly HttpClient _httpClient;
     private readonly string scopes = "user-read-playback-state user-modify-playback-state user-read-currently-playing user-read-playback-position user-top-read user-read-recently-played playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public";
 
-    private readonly string authCodeEndpoint = "https://accounts.spotify.com/authorize";
+    private readonly string authCodeEndpoint = "https://accounts.spotify.com/authorize?";
     private readonly string tokenEndpoint = "https://accounts.spotify.com/api/token";
     const string redirectSign = "/auth/authcode";
 
@@ -59,7 +59,7 @@ public class SpotifyLogin : ISpotifyLogin
         return authCode;
     }
 
-    public async Task<string> GetToken(string clientId, string clientSecret)
+    public async Task<string> GetToken(string clientId, string clientSecret, string code)
     {
         string token = "";
         try
@@ -71,7 +71,10 @@ public class SpotifyLogin : ISpotifyLogin
 
             requestMessage.Content = new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                {"grant_type", "client_credentials"}
+                {"grant_type", "authorization_code"},
+                {"code", code},
+                {"redirect_uri", "http://localhost:5039/"}
+
             });
 
             var response = await _httpClient.SendAsync(requestMessage);
@@ -92,19 +95,28 @@ public class SpotifyLogin : ISpotifyLogin
     }
 
 
-    public string BuildUri(string clientId, string clientSecret, string uriPath)
+    public Uri BuildUri(string clientId)
     {
         string urlParams = $"response_type=code&state=16&client_id={clientId}&redirect_uri=http://localhost:5039&scope={scopes}&show_dialog=true";
 
-        UriBuilder builder = new UriBuilder(uriPath);
+        // UriBuilder builder = new UriBuilder(uriPath);
         StringBuilder sb = new StringBuilder();
-        sb.Append("response_type = code");
+        sb.Append("/authorize?");
+        sb.Append("response_type=code");
         sb.Append("&state=16");
         sb.Append($"&client_id={clientId}");
-        sb.Append($"&redirect_uri={Uri.EscapeUriString(builder.Uri.AbsoluteUri)}");
+        sb.Append($"&redirect_uri={Uri.EscapeUriString("http://localhost:5039/auth/callback")}");
         sb.Append($"&scope={scopes}");
-        return "";
+        sb.Append("&show_dialog=true");
+        return new Uri(new Uri(authCodeEndpoint), sb.ToString());
     }
 
+    public async Task<string> ExchangeCodeForAccessToken (string code, string state){
+        
+        var token = await GetToken( state,"some code", code);
 
+        return token;
+    }
+
+   
 }
