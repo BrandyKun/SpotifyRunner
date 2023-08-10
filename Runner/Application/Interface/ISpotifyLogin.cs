@@ -8,6 +8,6 @@ public interface ISpotifyLogin
     // Task<AuthCode> GetAuthCodeAsync(string clientId, string clientSecret);
     Task<string> GetAuthCodeAsync(string clientId, string clientSecret);
 
-    Task<string> ExchangeCodeForAccessToken( string code, string state);
+    Task<string> ExchangeCodeForAccessToken( string code, string state, string clientId, string clientSecret);
     Uri BuildUri(string clientId);
 }

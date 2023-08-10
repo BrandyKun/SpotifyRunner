@@ -2,12 +2,9 @@ using Application.Interface;
 using Domain.Entities;
 using IdentityModel.Client;
 using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using static IdentityModel.OidcConstants;
 
 namespace Infrastructure.Services;
 
@@ -23,7 +20,6 @@ public class SpotifyLogin : ISpotifyLogin
     public SpotifyLogin(HttpClient httpClient)
     {
         _httpClient = httpClient;
-
     }
 
     public async Task<string> GetAuthCodeAsync(string clientId, string clientSecret)
@@ -38,7 +34,7 @@ public class SpotifyLogin : ISpotifyLogin
             ClientId = clientId,
             ClientSecret = clientSecret,
             Code = "16",
-            RedirectUri = "http://localhost:5039"            
+            RedirectUri = "http://localhost:5039"
         });
 
 
@@ -73,7 +69,7 @@ public class SpotifyLogin : ISpotifyLogin
             {
                 {"grant_type", "authorization_code"},
                 {"code", code},
-                {"redirect_uri", "http://localhost:5039/"}
+                {"redirect_uri", "http://localhost:5039/auth/callback"}
 
             });
 
@@ -107,16 +103,16 @@ public class SpotifyLogin : ISpotifyLogin
         sb.Append($"&client_id={clientId}");
         sb.Append($"&redirect_uri={Uri.EscapeUriString("http://localhost:5039/auth/callback")}");
         sb.Append($"&scope={scopes}");
-        sb.Append("&show_dialog=true");
+        // sb.Append("&show_dialog=true");
         return new Uri(new Uri(authCodeEndpoint), sb.ToString());
     }
 
-    public async Task<string> ExchangeCodeForAccessToken (string code, string state){
-        
-        var token = await GetToken( state,"some code", code);
+    public async Task<string> ExchangeCodeForAccessToken(string code, string state, string clientId, string clientSecret)
+    {
+        var token = await GetToken(clientId, clientSecret, code);
 
         return token;
     }
 
-   
+
 }

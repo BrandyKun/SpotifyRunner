@@ -1,7 +1,9 @@
+using System.Threading.Tasks;
 using System.Net;
 using Application.Interface;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace API.Controllers;
 
@@ -17,9 +19,11 @@ public class WeatherForecastController : ControllerBase
     private readonly ILogger<WeatherForecastController> _logger;
     private readonly ISpotifyLogin _spotifyService;
     private readonly IConfiguration _config;
+    public IOptions<AppSettings> _appSettings { get; }
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger, ISpotifyLogin spotifyService, IConfiguration config)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, ISpotifyLogin spotifyService, IConfiguration config, IOptions<AppSettings> appSettings)
     {
+        _appSettings = appSettings;
         _config = config;
         _spotifyService = spotifyService;
         _logger = logger;
@@ -40,14 +44,17 @@ public class WeatherForecastController : ControllerBase
     [HttpPost, Route("Token")]
     public async Task<string> RequestToken()
     {
-        var token = await _spotifyService.GetToken(_config["Spotify:client_id"], _config["Spotify:client_secret"], "something");
+        var token = await _spotifyService.GetToken(_appSettings.Value.ClientId, _appSettings.Value.ClientSecret, "something");
         var gotThings = token;
         return "true";
     }
     [HttpGet, Route("authCode")]
-    public ActionResult RequestAuthCode()
+    public Task<string> RequestAuthCode()
     {
-        var address = _spotifyService.BuildUri(_config["Spotify:client_id"]);
-        return Redirect(address.ToString());
+        return Task.Run(() =>
+        {
+            var address = _spotifyService.BuildUri(_appSettings.Value.ClientId);
+            return address?.ToString();
+        });
     }
 }
