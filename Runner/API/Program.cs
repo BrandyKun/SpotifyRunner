@@ -33,6 +33,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("NextPolicy");
+
 app.UseAuthorization();
 
 app.MapControllers();
