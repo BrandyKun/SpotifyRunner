@@ -69,7 +69,7 @@ public class SpotifyLogin : ISpotifyLogin
             {
                 {"grant_type", "authorization_code"},
                 {"code", code},
-                {"redirect_uri", "http://localhost:5039/auth/callback"}
+                {"redirect_uri", "http://localhost:3000/callback"}
 
             });
 
@@ -101,7 +101,7 @@ public class SpotifyLogin : ISpotifyLogin
         sb.Append("response_type=code");
         sb.Append("&state=16");
         sb.Append($"&client_id={clientId}");
-        sb.Append($"&redirect_uri={Uri.EscapeUriString("http://localhost:5039/auth/callback")}");
+        sb.Append($"&redirect_uri={Uri.EscapeUriString("http://localhost:3000/callback")}");
         sb.Append($"&scope={scopes}");
         // sb.Append("&show_dialog=true");
         return new Uri(new Uri(authCodeEndpoint), sb.ToString());

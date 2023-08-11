@@ -21,8 +21,12 @@ namespace API.Controllers
         [HttpGet("callback")]
         public async Task<IActionResult> Authcode([FromQuery] string code, [FromQuery] string state)
         {
-            await _spotifyService.ExchangeCodeForAccessToken(code, state, _appSettings.Value.ClientId, _appSettings.Value.ClientSecret);
-            return Redirect("/");
+            if (code != null && state != null)
+            {
+                await _spotifyService.ExchangeCodeForAccessToken(code, state, _appSettings.Value.ClientId, _appSettings.Value.ClientSecret);
+              
+            }
+              return Redirect("/");
         }
     }
 }
