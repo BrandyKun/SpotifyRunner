@@ -8,26 +8,30 @@ const page = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  
-
   useEffect(() => {
     console.log(searchParams.toString());
-   fetch(`http://localhost:5039/auth/callback?${searchParams.toString()}`,{headers : { 
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-   }})
-  .then((res) => res.json())
-  .then(data => {
-    console.log(data);
-    
-    setUrl(data)
-  })
-}, [])
+    fetch(`http://localhost:5039/auth/callback?${searchParams.toString()}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    })
+      .then((res) => {
+        console.log(res);
 
-//   useEffect(() => {
-//     if (router.isReady())
-// }, [])
-  
+        debugger
+        res.json();
+      })
+      .then((data) => {
+        console.log(data);
+        // setUrl(data);
+      });
+  }, []);
+
+  //   useEffect(() => {
+  //     if (router.isReady())
+  // }, [])
+
   return <div>page</div>;
 };
 

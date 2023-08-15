@@ -80,6 +80,8 @@ public class SpotifyLogin : ISpotifyLogin
 
             var authResult = await JsonSerializer.DeserializeAsync<AuthResult>(responseData);
 
+            DateTime t = DateTimeOffset.FromUnixTimeSeconds((long)authResult.expires_in).DateTime;
+
             token = authResult?.access_token;
         }
         catch (HttpRequestException ex)
