@@ -17,8 +17,7 @@ const [data, setData] = useState<UriResponse | null>();
      }})
     .then((res) => res.json())
     .then(data => {
-      console.log(data);
-      debugger
+      console.log(data, 'pre-call');
       setData(data)
     })
   }, [])

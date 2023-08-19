@@ -3,36 +3,40 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useState } from "react";
 
+type ResponseAuth = {
+  access_token: string;
+  token_type: string;
+  refresh_token: string;
+  expires_in: number;
+};
+
 const page = () => {
-  const [redirectparams, setUrl] = useState();
+  const [redirectparams, setUrl] = useState<ResponseAuth | null>();
   const searchParams = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
-    console.log(searchParams.toString());
-    fetch(`http://localhost:5039/auth/callback?${searchParams.toString()}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    })
-      .then((res) => {
-        console.log(res);
-
-        debugger
-        res.json();
-      })
-      .then((data) => {
-        console.log(data);
-        // setUrl(data);
-      });
+    // console.log(searchParams.toString());
+    if (searchParams) {
+      fetch(`http://localhost:5039/auth/callback?${searchParams.toString()}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      }).then((res) =>
+        res.json().then((json) => {
+          console.log(json);
+        })
+      );
+    }
   }, []);
 
   //   useEffect(() => {
   //     if (router.isReady())
   // }, [])
 
-  return <div>page</div>;
+  return <div>Callback</div>;
 };
 
 export default page;

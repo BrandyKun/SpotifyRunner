@@ -54,7 +54,7 @@ public class WeatherForecastController : ControllerBase
         return Task.Run(() =>
         {
             var address = _spotifyService.BuildUri(_appSettings.Value.ClientId);
-            return address?.ToString();
+            return address.ToString();
         });
     }
 }

@@ -19,9 +19,9 @@ namespace API.Controllers
         }
 
         [HttpGet("callback")]
-        public async Task<string> Authcode([FromQuery] string code, [FromQuery] string state)
+        public async Task<AuthResult> Authcode([FromQuery] string code, [FromQuery] string state)
         {
-            var token = "";
+            AuthResult token = new AuthResult();
             if (code != null && state != null)
             {
                 token = await _spotifyService.ExchangeCodeForAccessToken(code, state, _appSettings.Value.ClientId, _appSettings.Value.ClientSecret);

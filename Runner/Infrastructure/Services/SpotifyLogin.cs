@@ -55,9 +55,9 @@ public class SpotifyLogin : ISpotifyLogin
         return authCode;
     }
 
-    public async Task<string> GetToken(string clientId, string clientSecret, string code)
+    public async Task<AuthResult> GetToken(string clientId, string clientSecret, string code)
     {
-        string token = "";
+        AuthResult token = new AuthResult();
         try
         {
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint);
@@ -78,11 +78,9 @@ public class SpotifyLogin : ISpotifyLogin
             response.EnsureSuccessStatusCode();
             var responseData = await response.Content.ReadAsStreamAsync();
 
-            var authResult = await JsonSerializer.DeserializeAsync<AuthResult>(responseData);
+            token = await JsonSerializer.DeserializeAsync<AuthResult>(responseData);
 
-            DateTime t = DateTimeOffset.FromUnixTimeSeconds((long)authResult.expires_in).DateTime;
-
-            token = authResult?.access_token;
+            DateTime t = DateTimeOffset.FromUnixTimeSeconds((long)token.expires_in).DateTime;
         }
         catch (HttpRequestException ex)
         {
@@ -109,7 +107,7 @@ public class SpotifyLogin : ISpotifyLogin
         return new Uri(new Uri(authCodeEndpoint), sb.ToString());
     }
 
-    public async Task<string> ExchangeCodeForAccessToken(string code, string state, string clientId, string clientSecret)
+    public async Task<AuthResult> ExchangeCodeForAccessToken(string code, string state, string clientId, string clientSecret)
     {
         var token = await GetToken(clientId, clientSecret, code);
 
