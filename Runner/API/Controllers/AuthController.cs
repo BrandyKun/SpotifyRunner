@@ -18,6 +18,14 @@ namespace API.Controllers
             _spotifyService = spotifyService;
         }
 
+        /// <summary>
+        /// Using the authcode from the url
+        /// is used to retireve bearer token
+        /// for oAuth auth code flow.
+        /// </summary>
+        /// <param name="code">string from query string</param>
+        /// <param name="state">string from state</param>
+        /// <returns>Token</returns>
         [HttpGet("callback")]
         public async Task<AuthResult> Authcode([FromQuery] string code, [FromQuery] string state)
         {
@@ -25,12 +33,35 @@ namespace API.Controllers
             if (code != null && state != null)
             {
                 token = await _spotifyService.ExchangeCodeForAccessToken(code, state, _appSettings.Value.ClientId, _appSettings.Value.ClientSecret);
-              
+
             }
-            if(token == null)
-            return null;
+            if (token == null)
+                return null;
 
             return token;
+        }
+
+        [HttpPost, Route("Token")]
+        public async Task<string> RequestToken()
+        {
+            var token = await _spotifyService.GetToken(_appSettings.Value.ClientId, _appSettings.Value.ClientSecret, "something");
+            var gotThings = token;
+            return "true";
+        }
+
+        /// <summary>
+        /// Method to log in on spotify 
+        /// using AuthCode oAuth Flow
+        /// </summary>
+        /// <returns>redirect url in a string</returns>
+        [HttpGet, Route("authCode")]
+        public Task<string> RequestAuthCode()
+        {
+            return Task.Run(() =>
+            {
+                var address = _spotifyService.BuildUri(_appSettings.Value.ClientId);
+                return address.ToString();
+            });
         }
     }
 }

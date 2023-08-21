@@ -1,6 +1,7 @@
 using Application.Interface;
 using Domain.Entities;
 using IdentityModel.Client;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
@@ -11,15 +12,17 @@ namespace Infrastructure.Services;
 public class SpotifyLogin : ISpotifyLogin
 {
     private readonly HttpClient _httpClient;
+    private readonly SpotifyDbContext _spotifyDbContext;
     private readonly string scopes = "user-read-playback-state user-modify-playback-state user-read-currently-playing user-read-playback-position user-top-read user-read-recently-played playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public";
 
     private readonly string authCodeEndpoint = "https://accounts.spotify.com/authorize?";
     private readonly string tokenEndpoint = "https://accounts.spotify.com/api/token";
     const string redirectSign = "/auth/authcode";
 
-    public SpotifyLogin(HttpClient httpClient)
+    public SpotifyLogin(HttpClient httpClient, SpotifyDbContext spotifyDbContext)
     {
         _httpClient = httpClient;
+        _spotifyDbContext = spotifyDbContext;
     }
 
     public async Task<string> GetAuthCodeAsync(string clientId, string clientSecret)
@@ -114,5 +117,43 @@ public class SpotifyLogin : ISpotifyLogin
         return token;
     }
 
+    public async Task<string> ReturnAccessTokenFromRefreshToken()
+    {
+        try
+        {
 
+            var token = await _spotifyDbContext.SpotifyTokens.OrderByDescending(t => t.Expirytime)
+                                                                .FirstOrDefaultAsync();
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint);
+
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue(
+                "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}")));
+
+            requestMessage.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                {"grant_type", "refresh_token"},
+                {"refresh_token", "{refresh_token}"}
+
+            });
+
+            var response = await _httpClient.SendAsync(requestMessage);
+
+            response.EnsureSuccessStatusCode();
+            var responseData = await response.Content.ReadAsStreamAsync();
+
+            var convertedResult = await JsonSerializer.DeserializeAsync<AuthResult>(responseData);
+
+            var newToken = new SpotifyToken{
+                AccessToken = convertedResult?.access_token,
+                RefreshToken = convertedResult?.refresh_token,
+                Expirytime = DateTimeOffset.FromUnixTimeSeconds((long)convertedResult.expires_in).DateTime
+            };
+
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new HttpRequestException(ex.Message, ex);
+        }
+    }
 }

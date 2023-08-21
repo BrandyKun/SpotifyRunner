@@ -1,6 +1,8 @@
 using Application.Interface;
 using Domain.Entities;
+using Infrastructure;
 using Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOptions();
 var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
-builder.Configuration.GetConnectionString("DefaultSql");
+builder.Services.AddDbContext<SpotifyDbContext>(options => 
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSql")));
 builder.Services.AddCors( options => {
     options.AddPolicy(name: "NextPolicy", 
     policy => {
