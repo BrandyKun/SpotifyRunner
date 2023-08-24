@@ -48,13 +48,11 @@ public class WeatherForecastController : ControllerBase
         var gotThings = token;
         return "true";
     }
+    
     [HttpGet, Route("authCode")]
-    public Task<string> RequestAuthCode()
+    public ActionResult RequestAuthCode()
     {
-        return Task.Run(() =>
-        {
-            var address = _spotifyService.BuildUri(_appSettings.Value.ClientId);
-            return address.ToString();
-        });
+        var address = _spotifyService.BuildUri(_config["Spotify:client_id"]);
+        return Redirect(address.ToString());
     }
 }

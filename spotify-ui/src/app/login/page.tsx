@@ -11,7 +11,7 @@ const login = () => {
 const [data, setData] = useState<UriResponse | null>();
 
   useEffect(()  => {
-    fetch('http://localhost:5039/weatherforecast/authcode', {headers : { 
+    fetch('http://localhost:5039/auth/authcode', {headers : { 
       'Content-Type': 'application/json',
       'Accept': 'application/json'
      }})

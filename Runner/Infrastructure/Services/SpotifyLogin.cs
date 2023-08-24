@@ -1,3 +1,4 @@
+using System.Security.Principal;
 using Application.Interface;
 using Domain.Entities;
 using IdentityModel.Client;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using AutoMapper;
 
 namespace Infrastructure.Services;
 
@@ -18,11 +20,23 @@ public class SpotifyLogin : ISpotifyLogin
     private readonly string authCodeEndpoint = "https://accounts.spotify.com/authorize?";
     private readonly string tokenEndpoint = "https://accounts.spotify.com/api/token";
     const string redirectSign = "/auth/authcode";
+    private readonly IMapper _mapper;
 
-    public SpotifyLogin(HttpClient httpClient, SpotifyDbContext spotifyDbContext)
+    public SpotifyLogin(HttpClient httpClient, SpotifyDbContext spotifyDbContext, IMapper mapper)
     {
+        _mapper = mapper;
         _httpClient = httpClient;
         _spotifyDbContext = spotifyDbContext;
+    }
+
+    public async Task<ClientDetail> GetClientDetailsAsync()
+    {
+        var clientDets = await _spotifyDbContext.ClientDetails.FirstOrDefaultAsync();
+
+        if (clientDets == null)
+            throw new ArgumentNullException();
+
+        return clientDets;
     }
 
     public async Task<string> GetAuthCodeAsync(string clientId, string clientSecret)
@@ -61,29 +75,38 @@ public class SpotifyLogin : ISpotifyLogin
     public async Task<AuthResult> GetToken(string clientId, string clientSecret, string code)
     {
         AuthResult token = new AuthResult();
+
         try
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint);
-
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue(
-                "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}")));
-
-            requestMessage.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+            if (!string.IsNullOrEmpty(code))
             {
-                {"grant_type", "authorization_code"},
-                {"code", code},
-                {"redirect_uri", "http://localhost:3000/callback"}
+                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint);
 
-            });
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue(
+                    "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}")));
 
-            var response = await _httpClient.SendAsync(requestMessage);
+                requestMessage.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    {"grant_type", "authorization_code"},
+                    {"code", code},
+                    {"redirect_uri", "http://localhost:3000/callback"}
+                });
 
-            response.EnsureSuccessStatusCode();
-            var responseData = await response.Content.ReadAsStreamAsync();
+                var response = await _httpClient.SendAsync(requestMessage);
 
-            token = await JsonSerializer.DeserializeAsync<AuthResult>(responseData);
+                response.EnsureSuccessStatusCode();
+                var responseData = await response.Content.ReadAsStreamAsync();
 
-            DateTime t = DateTimeOffset.FromUnixTimeSeconds((long)token.expires_in).DateTime;
+                token = await JsonSerializer.DeserializeAsync<AuthResult>(responseData);
+
+                DateTime time = DateTime.Now;
+                time = time.AddSeconds(token.expires_in);
+                token.ExpiryTime = time;
+                var newSave = _mapper.Map<SpotifyToken>(token);
+                _spotifyDbContext.SpotifyTokens.Add(newSave);
+                _spotifyDbContext.SaveChanges();
+
+            }
         }
         catch (HttpRequestException ex)
         {
@@ -98,13 +121,13 @@ public class SpotifyLogin : ISpotifyLogin
     {
         string urlParams = $"response_type=code&state=16&client_id={clientId}&redirect_uri=http://localhost:5039&scope={scopes}&show_dialog=true";
 
-        // UriBuilder builder = new UriBuilder(uriPath);
         StringBuilder sb = new StringBuilder();
         sb.Append("/authorize?");
         sb.Append("response_type=code");
         sb.Append("&state=16");
         sb.Append($"&client_id={clientId}");
         sb.Append($"&redirect_uri={Uri.EscapeUriString("http://localhost:3000/callback")}");
+        // sb.Append($"&redirect_uri={Uri.EscapeUriString("http://localhost:5039/callback")}");
         sb.Append($"&scope={scopes}");
         // sb.Append("&show_dialog=true");
         return new Uri(new Uri(authCodeEndpoint), sb.ToString());
@@ -121,19 +144,21 @@ public class SpotifyLogin : ISpotifyLogin
     {
         try
         {
-
             var token = await _spotifyDbContext.SpotifyTokens.OrderByDescending(t => t.Expirytime)
                                                                 .FirstOrDefaultAsync();
+            if (token == null)
+                throw new ArgumentNullException("token");
+
 
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint);
 
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue(
-                "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}")));
+                "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes("{clientId}")));
 
             requestMessage.Content = new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 {"grant_type", "refresh_token"},
-                {"refresh_token", "{refresh_token}"}
+                {"refresh_token", $"{token.RefreshToken}"}
 
             });
 
@@ -144,11 +169,20 @@ public class SpotifyLogin : ISpotifyLogin
 
             var convertedResult = await JsonSerializer.DeserializeAsync<AuthResult>(responseData);
 
-            var newToken = new SpotifyToken{
+            if (convertedResult == null)
+                throw new HttpRequestException();
+
+            var newToken = new SpotifyToken
+            {
                 AccessToken = convertedResult?.access_token,
-                RefreshToken = convertedResult?.refresh_token,
+                RefreshToken = string.IsNullOrEmpty(convertedResult?.refresh_token) ? convertedResult.refresh_token : token.RefreshToken,
                 Expirytime = DateTimeOffset.FromUnixTimeSeconds((long)convertedResult.expires_in).DateTime
             };
+
+            _spotifyDbContext.SpotifyTokens.Add(newToken);
+            _spotifyDbContext.SaveChanges();
+
+            return newToken.AccessToken;
 
         }
         catch (HttpRequestException ex)

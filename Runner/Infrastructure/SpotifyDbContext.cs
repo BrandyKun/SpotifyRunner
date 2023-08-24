@@ -10,6 +10,5 @@ public class SpotifyDbContext : DbContext
         
     }
     public DbSet<SpotifyToken> SpotifyTokens { get; set; }
-
+    public DbSet<ClientDetail> ClientDetails { get; set; }
 }
-æ

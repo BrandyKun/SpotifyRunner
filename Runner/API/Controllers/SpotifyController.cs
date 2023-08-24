@@ -6,5 +6,5 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public class SpotifyController : ControllerBase
 {
-    
+    // public async Task<IActionResult> Index()
 }
