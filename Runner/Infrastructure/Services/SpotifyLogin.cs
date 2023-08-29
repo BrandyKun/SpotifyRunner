@@ -39,17 +39,23 @@ public class SpotifyLogin : ISpotifyLogin
         return clientDets;
     }
 
-    public async Task<string> GetAuthCodeAsync(string clientId, string clientSecret)
+    public async Task<string> GetAuthCodeAsync()
     {
 
-        string urlParams = $"response_type=code&state=16&client_id={clientId}&redirect_uri=http://localhost:5039&scope={scopes}&show_dialog=true";
+        var spotifyDets = await GetClientDetailsAsync();
+
+        if (spotifyDets == null)
+            throw new ArgumentNullException();
+
+
+        string urlParams = $"response_type=code&state=16&client_id={spotifyDets.ClientId}&redirect_uri=http://localhost:5039&scope={scopes}&show_dialog=true";
         HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{authCodeEndpoint}?{urlParams}");
 
         var messageResponse = await _httpClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest()
         {
             Address = tokenEndpoint,
-            ClientId = clientId,
-            ClientSecret = clientSecret,
+            ClientId = spotifyDets.ClientId,
+            ClientSecret = spotifyDets.ClientSecret,
             Code = "16",
             RedirectUri = "http://localhost:5039"
         });
@@ -72,9 +78,11 @@ public class SpotifyLogin : ISpotifyLogin
         return authCode;
     }
 
-    public async Task<AuthResult> GetToken(string clientId, string clientSecret, string code)
+    public async Task<AuthResult> GetToken(string code)
     {
         AuthResult token = new AuthResult();
+
+        var spotifyDets = await GetClientDetailsAsync();
 
         try
         {
@@ -83,7 +91,7 @@ public class SpotifyLogin : ISpotifyLogin
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint);
 
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue(
-                    "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}")));
+                    "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{spotifyDets.ClientId}:{spotifyDets.ClientSecret}")));
 
                 requestMessage.Content = new FormUrlEncodedContent(new Dictionary<string, string>
                 {
@@ -117,15 +125,16 @@ public class SpotifyLogin : ISpotifyLogin
     }
 
 
-    public Uri BuildUri(string clientId)
+    public Uri BuildUri()
     {
-        string urlParams = $"response_type=code&state=16&client_id={clientId}&redirect_uri=http://localhost:5039&scope={scopes}&show_dialog=true";
+        var spotifyDets = GetClientDetailsAsync().GetAwaiter().GetResult();
+        string urlParams = $"response_type=code&state=16&client_id={spotifyDets.ClientId}&redirect_uri=http://localhost:5039&scope={scopes}&show_dialog=true";
 
         StringBuilder sb = new StringBuilder();
         sb.Append("/authorize?");
         sb.Append("response_type=code");
         sb.Append("&state=16");
-        sb.Append($"&client_id={clientId}");
+        sb.Append($"&client_id={spotifyDets.ClientId}");
         sb.Append($"&redirect_uri={Uri.EscapeUriString("http://localhost:3000/callback")}");
         // sb.Append($"&redirect_uri={Uri.EscapeUriString("http://localhost:5039/callback")}");
         sb.Append($"&scope={scopes}");
@@ -133,9 +142,11 @@ public class SpotifyLogin : ISpotifyLogin
         return new Uri(new Uri(authCodeEndpoint), sb.ToString());
     }
 
-    public async Task<AuthResult> ExchangeCodeForAccessToken(string code, string state, string clientId, string clientSecret)
+    public async Task<AuthResult> ExchangeCodeForAccessToken(string code, string state)
     {
-        var token = await GetToken(clientId, clientSecret, code);
+        var spotifyDets = await GetClientDetailsAsync();
+
+        var token = await GetToken(code);
 
         return token;
     }

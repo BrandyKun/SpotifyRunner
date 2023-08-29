@@ -32,7 +32,7 @@ namespace API.Controllers
             AuthResult token = new AuthResult();
             if (code != null && state != null)
             {
-                token = await _spotifyService.ExchangeCodeForAccessToken(code, state, _appSettings.Value.ClientId, _appSettings.Value.ClientSecret);
+                token = await _spotifyService.ExchangeCodeForAccessToken(code, state);
 
             }
             if (token == null)
@@ -44,7 +44,7 @@ namespace API.Controllers
         [HttpPost, Route("Token")]
         public async Task<string> RequestToken()
         {
-            var token = await _spotifyService.GetToken(_appSettings.Value.ClientId, _appSettings.Value.ClientSecret, "something");
+            var token = await _spotifyService.GetToken( "something");
             var gotThings = token;
             return "true";
         }
@@ -59,7 +59,9 @@ namespace API.Controllers
         {
             return Task.Run(() =>
             {
-                var address = _spotifyService.BuildUri(_appSettings.Value.ClientId);
+                var address = _spotifyService.BuildUri(
+                    
+                );
                 return address.ToString();
             });
         }

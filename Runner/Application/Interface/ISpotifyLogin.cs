@@ -4,9 +4,9 @@ namespace Application.Interface;
 
 public interface ISpotifyLogin
 {
-    Task<AuthResult> GetToken(string clientId, string clientSecret, string code);
-    Task<string> GetAuthCodeAsync(string clientId, string clientSecret);
-    Task<AuthResult> ExchangeCodeForAccessToken( string code, string state, string clientId, string clientSecret);
-    Uri BuildUri(string clientId);
+    Task<AuthResult> GetToken( string code);
+    Task<string> GetAuthCodeAsync();
+    Task<AuthResult> ExchangeCodeForAccessToken( string code, string state);
+    Uri BuildUri();
     Task<string> ReturnAccessTokenFromRefreshToken();
 }
