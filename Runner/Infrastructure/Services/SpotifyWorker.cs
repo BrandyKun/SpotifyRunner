@@ -1,28 +1,49 @@
 using Application.Interface;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
 namespace Infrastructure.Services;
 
 public class SpotifyWorker : ISpotifyWorker
 {
+    private readonly HttpClient _httpClient;
+    private readonly SpotifyDbContext _spotifyDbContext;
     private SpotifyTokentoReturn token = new SpotifyTokentoReturn();
-    public SpotifyWorker()
+    private readonly string tokenEndpoint = "https://accounts.spotify.com/api/token";
+
+
+    public SpotifyWorker(HttpClient httpClient, SpotifyDbContext spotifyDbContext)
     {
-        
+        _httpClient = httpClient;
+        _spotifyDbContext = spotifyDbContext;
     }
-    public string AccessToken 
+
+    public string AccessToken
     {
-        get {
-            if(token.IsValid || ReturnAccessTokenFromRefreshToken())
+        get
+        {
+            if (token.IsValid || ReturnAccessTokenFromRefreshToken().Result)
+            {
+                return token.AccessToken;
+            }
+            return string.Empty;
         }
+
     }
     public Task<string> GetSpotifyInformation()
     {
         throw new NotImplementedException();
     }
 
-     public async Task<string> ReturnAccessTokenFromRefreshToken()
+    public async Task<bool> ReturnAccessTokenFromRefreshToken()
     {
+        if (token.IsValid)
+        {
+            return true;
+        }
         try
         {
             var token = await _spotifyDbContext.SpotifyTokens.OrderByDescending(t => t.Expirytime)
@@ -63,7 +84,7 @@ public class SpotifyWorker : ISpotifyWorker
             _spotifyDbContext.SpotifyTokens.Add(newToken);
             _spotifyDbContext.SaveChanges();
 
-            return newToken.AccessToken;
+            return true;
 
         }
         catch (HttpRequestException ex)
