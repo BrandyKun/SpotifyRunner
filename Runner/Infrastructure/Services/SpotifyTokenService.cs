@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace Infrastructure.Services;
 
-public class SpotifyWorker : ISpotifyWorker
+public class SpotifyTokenService : ISpotifyTokenService
 {
     private readonly HttpClient _httpClient;
     private readonly SpotifyDbContext _spotifyDbContext;
@@ -15,7 +15,7 @@ public class SpotifyWorker : ISpotifyWorker
     private readonly string tokenEndpoint = "https://accounts.spotify.com/api/token";
 
 
-    public SpotifyWorker(HttpClient httpClient, SpotifyDbContext spotifyDbContext)
+    public SpotifyTokenService(HttpClient httpClient, SpotifyDbContext spotifyDbContext)
     {
         _httpClient = httpClient;
         _spotifyDbContext = spotifyDbContext;

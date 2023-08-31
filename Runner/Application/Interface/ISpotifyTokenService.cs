@@ -1,6 +1,6 @@
 namespace Application.Interface;
 
-public interface ISpotifyWorker
+public interface ISpotifyTokenService
 {
     Task<string> GetSpotifyInformation();
 }

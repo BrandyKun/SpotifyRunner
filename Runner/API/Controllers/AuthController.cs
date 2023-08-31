@@ -11,10 +11,8 @@ namespace API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ISpotifyLogin _spotifyService;
-        private readonly IOptions<AppSettings> _appSettings;
-        public AuthController(ISpotifyLogin spotifyService, IOptions<AppSettings> appsettings)
+        public AuthController(ISpotifyLogin spotifyService)
         {
-            _appSettings = appsettings;
             _spotifyService = spotifyService;
         }
 
@@ -60,7 +58,7 @@ namespace API.Controllers
             return Task.Run(() =>
             {
                 var address = _spotifyService.BuildUri(
-                    
+
                 );
                 return address.ToString();
             });
