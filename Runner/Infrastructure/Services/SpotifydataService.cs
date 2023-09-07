@@ -5,13 +5,39 @@ namespace Infrastructure.Services;
 
 public class SpotifydataService : ISpotifyDataService
 {
-    private readonly 
-    public SpotifydataService()
+    private readonly SpotifyTokenService _tokenService;
+    private ClientDetail spotifyDetails;
+    private SpotifyTokentoReturn token = new SpotifyTokentoReturn();
+    public SpotifydataService(SpotifyTokenService tokenService)
     {
+        _tokenService = tokenService;
     }
+    // public ClientDetail Details
+    // {
+    //     get{
+    //         ClientDetail cd = new ClientDetail();
+    //         if (spotifyDetails != null)
+    //         {}cd 
+    //     }
+    // }
 
-    public Task<SpotifyUser> GetUserInfo(string token)
+    public string AccessToken
     {
-        throw new NotImplementedException();
+        get
+        {
+            if (token.IsValid || _tokenService.ReturnAccessTokenFromRefreshToken().Result)
+            { return token.AccessToken; }
+            return _tokenService.AccessToken;
+        }
+    }
+    public Task<SpotifyUser> GetUserInfo()
+    {
+        if(string.IsNullOrEmpty(AccessToken))
+        {
+            throw new ArgumentNullException("No access token available");
+            
+            ///call endpoint to get user info
+            
+        }
     }
 }

@@ -15,7 +15,7 @@ public class SpotifyLogin : ISpotifyLogin
 {
     private readonly HttpClient _httpClient;
     private readonly SpotifyDbContext _spotifyDbContext;
-    private readonly string scopes = "user-read-playback-state user-modify-playback-state user-read-currently-playing user-read-playback-position user-top-read user-read-recently-played playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public";
+    private readonly string scopes = "user-read-playback-state user-modify-playback-state user-read-currently-playing user-read-playback-position user-top-read user-read-recently-played playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-read-private user-read-email user-library-modify user-library-read";
 
     private readonly string authCodeEndpoint = "https://accounts.spotify.com/authorize?";
     private readonly string tokenEndpoint = "https://accounts.spotify.com/api/token";

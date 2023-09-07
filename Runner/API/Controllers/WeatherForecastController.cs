@@ -41,18 +41,18 @@ public class WeatherForecastController : ControllerBase
         .ToArray();
     }
 
-    [HttpPost, Route("Token")]
-    public async Task<string> RequestToken()
-    {
-        var token = await _spotifyService.GetToken(_appSettings.Value.ClientId, _appSettings.Value.ClientSecret, "something");
-        var gotThings = token;
-        return "true";
-    }
+    // [HttpPost, Route("Token")]
+    // public async Task<string> RequestToken()
+    // {
+    //     var token = await _spotifyService.GetToken(_appSettings.Value.ClientId, _appSettings.Value.ClientSecret, "something");
+    //     var gotThings = token;
+    //     return "true";
+    // }
     
-    [HttpGet, Route("authCode")]
-    public ActionResult RequestAuthCode()
-    {
-        var address = _spotifyService.BuildUri(_config["Spotify:client_id"]);
-        return Redirect(address.ToString());
-    }
+    // [HttpGet, Route("authCode")]
+    // public ActionResult RequestAuthCode()
+    // {
+    //     var address = _spotifyService.BuildUri(_config["Spotify:client_id"]);
+    //     return Redirect(address.ToString());
+    // }
 }
