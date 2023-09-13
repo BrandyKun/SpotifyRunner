@@ -5,5 +5,5 @@ namespace Application.Interface;
 
 public interface ISpotifyDataService
 {
-    Task<SpotifyUser> GetUserInfo(string token);
+    Task<SpotifyUser> GetUserInfo();
 }
