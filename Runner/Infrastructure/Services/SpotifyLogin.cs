@@ -60,7 +60,6 @@ public class SpotifyLogin : ISpotifyLogin
             RedirectUri = "http://localhost:5039"
         });
 
-
         AuthResult token = new AuthResult()
         {
             access_token = messageResponse.AccessToken,
@@ -73,8 +72,10 @@ public class SpotifyLogin : ISpotifyLogin
         var responseData = await response.Content.ReadAsStreamAsync();
 
         var authCode = await JsonSerializer.DeserializeAsync<string>(responseData);
-        // throw new NotImplementedException();
 
+        if (authCode == null)
+            throw new ArgumentNullException();
+            
         return authCode;
     }
 
@@ -107,6 +108,9 @@ public class SpotifyLogin : ISpotifyLogin
 
                 token = await JsonSerializer.DeserializeAsync<AuthResult>(responseData);
 
+                if (token == null)
+                    throw new NullReferenceException();
+
                 DateTime time = DateTime.Now;
                 time = time.AddSeconds(token.expires_in);
                 token.ExpiryTime = time;
@@ -135,7 +139,7 @@ public class SpotifyLogin : ISpotifyLogin
         sb.Append("response_type=code");
         sb.Append("&state=16");
         sb.Append($"&client_id={spotifyDets.ClientId}");
-        sb.Append($"&redirect_uri={Uri.EscapeUriString("http://localhost:3000/callback")}");
+        sb.Append($"&redirect_uri={Uri.EscapeDataString("http://localhost:3000/callback")}");
         // sb.Append($"&redirect_uri={Uri.EscapeUriString("http://localhost:5039/callback")}");
         sb.Append($"&scope={scopes}");
         // sb.Append("&show_dialog=true");
@@ -151,5 +155,5 @@ public class SpotifyLogin : ISpotifyLogin
         return token;
     }
 
-   
+
 }
