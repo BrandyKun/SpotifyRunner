@@ -31,10 +31,9 @@ namespace API.Controllers
             if (code != null && state != null)
             {
                 token = await _spotifyService.ExchangeCodeForAccessToken(code, state);
-
             }
             if (token == null)
-                return null;
+                throw new NullReferenceException();
 
             return token;
         }
@@ -57,9 +56,7 @@ namespace API.Controllers
         {
             return Task.Run(() =>
             {
-                var address = _spotifyService.BuildUri(
-
-                );
+                var address = _spotifyService.BuildUri();
                 return address.ToString();
             });
         }

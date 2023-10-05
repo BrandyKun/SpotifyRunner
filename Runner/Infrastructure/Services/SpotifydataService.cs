@@ -53,6 +53,11 @@ public class SpotifyDataService : ISpotifyDataService
         // var response = await _httpClient.SendAsync(request, CancellationToken.None).ConfigureAwait(false);
 
 
+        HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{spotifyBaseUrl}/me");
+
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
+
+
         throw new NotImplementedException();
     }
 }
