@@ -11,10 +11,11 @@ using AutoMapper;
 
 namespace Infrastructure.Services;
 
-public class SpotifyLogin : ISpotifyLogin
+public class SpotifyLogin : ISpotifyLogin, ISpotifyRefreshToken
 {
     private readonly HttpClient _httpClient;
     private readonly SpotifyDbContext _spotifyDbContext;
+    private  SpotifyTokenService _tokenService;
     private readonly string scopes = "user-read-playback-state user-modify-playback-state user-read-currently-playing user-read-playback-position user-top-read user-read-recently-played playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-read-private user-read-email user-library-modify user-library-read";
 
     private readonly string authCodeEndpoint = "https://accounts.spotify.com/authorize?";
@@ -78,7 +79,7 @@ public class SpotifyLogin : ISpotifyLogin
         return authCode;
     }
 
-    public async Task<AuthResult> GetToken(string code)
+    public async Task<AuthResult> ExchangeCodeForAccessToken(string code, string state)
     {
         AuthResult token = new AuthResult();
 
@@ -141,15 +142,12 @@ public class SpotifyLogin : ISpotifyLogin
         // sb.Append("&show_dialog=true");
         return new Uri(new Uri(authCodeEndpoint), sb.ToString());
     }
-
-    public async Task<AuthResult> ExchangeCodeForAccessToken(string code, string state)
+    Task<SpotifyTokentoReturn> ISpotifyRefreshToken.ReturnAccessTokenFromRefreshToken()
     {
-        var spotifyDets = await GetClientDetailsAsync();
-
-        var token = await GetToken(code);
-
-        return token;
+        throw new NotImplementedException();
     }
 
-   
+    // 
+
+
 }

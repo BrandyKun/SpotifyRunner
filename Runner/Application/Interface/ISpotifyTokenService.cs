@@ -1,6 +1,9 @@
+using Domain.Entities;
+
 namespace Application.Interface;
 
 public interface ISpotifyTokenService
 {
-    Task<string> GetSpotifyInformation();
+    Task<SpotifyTokentoReturn> GetTokenFromDB();
+    Task<ClientDetail> GetClientDetails();
 }

@@ -1,55 +1,42 @@
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using Application.Interface;
 using AutoMapper;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
 
 namespace Infrastructure.Services;
 
-public class SpotifyTokenService : ISpotifyTokenService
+public class SpotifyRefreshTokenService : ISpotifyRefreshToken
 {
     private readonly HttpClient _httpClient;
-    private readonly SpotifyDbContext _spotifyDbContext;
     private readonly IMapper _mapper;
-    private SpotifyTokentoReturn token = new SpotifyTokentoReturn();
+    private readonly SpotifyDbContext _spotifyDbContext;
     private readonly string tokenEndpoint = "https://accounts.spotify.com/api/token";
-
-
-    public SpotifyTokenService(HttpClient httpClient, SpotifyDbContext spotifyDbContext, IMapper mapper)
+    public SpotifyRefreshTokenService(HttpClient httpClient, SpotifyDbContext spotifyDbContext, IMapper mapper)
     {
-        _httpClient = httpClient;
         _spotifyDbContext = spotifyDbContext;
+        _httpClient = httpClient;
         _mapper = mapper;
-    }
-
-    public string AccessToken
-    {
-        get
-        {
-            if (token.IsValid || ReturnAccessTokenFromRefreshToken().Result)
-            {
-                return token.AccessToken;
-            }
-            return string.Empty;
-        }
 
     }
 
-    public async Task<bool> ReturnAccessTokenFromRefreshToken()
+    public async Task<SpotifyTokentoReturn> ReturnAccessTokenFromRefreshToken()
     {
-        if (token.IsValid)
-        {
-            return true;
-        }
         try
         {
             var token = await _spotifyDbContext.SpotifyTokens.OrderByDescending(t => t.Expirytime)
                                                                 .FirstOrDefaultAsync();
+
             if (token == null)
                 throw new ArgumentNullException("token");
 
+            SpotifyTokentoReturn transformedtoken = _mapper.Map<SpotifyToken, SpotifyTokentoReturn>(token);
+
+            if(transformedtoken.IsValid)
+
+            return transformedtoken;
 
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint);
 
@@ -83,35 +70,12 @@ public class SpotifyTokenService : ISpotifyTokenService
             _spotifyDbContext.SpotifyTokens.Add(newToken);
             _spotifyDbContext.SaveChanges();
 
-            return true;
+            return _mapper.Map<SpotifyTokentoReturn>(newToken);
 
         }
         catch (HttpRequestException ex)
         {
             throw new HttpRequestException(ex.Message, ex);
         }
-    }
-
-    public async Task<SpotifyTokentoReturn> GetTokenFromDB()
-    {
-        var token = await _spotifyDbContext.SpotifyTokens.LastOrDefaultAsync();
-
-        if(token == null)
-         throw new ArgumentNullException();
-
-        return _mapper.Map<SpotifyToken,SpotifyTokentoReturn>(token);
-
-        throw new NotImplementedException();
-
-    }
-
-    public async Task<ClientDetail> GetClientDetails()
-    {
-        var clientDets = await _spotifyDbContext.ClientDetails.FirstOrDefaultAsync();
-
-        if(clientDets == null)
-         throw new ArgumentNullException();
-
-        return clientDets;
     }
 }

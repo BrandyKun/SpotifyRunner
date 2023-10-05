@@ -42,7 +42,7 @@ namespace API.Controllers
         [HttpPost, Route("Token")]
         public async Task<string> RequestToken()
         {
-            var token = await _spotifyService.GetToken( "something");
+            var token = await _spotifyService.ExchangeCodeForAccessToken( "something","16");
             var gotThings = token;
             return "true";
         }

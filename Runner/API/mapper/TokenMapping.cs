@@ -12,5 +12,6 @@ public class TokenMapping : Profile
                         s => s.MapFrom(sp => sp.access_token))
             .ForMember(x => x.RefreshToken,
                         s => s.MapFrom(sp => sp.refresh_token));
+        CreateMap<SpotifyToken, SpotifyTokentoReturn>().ReverseMap();
     }
 }

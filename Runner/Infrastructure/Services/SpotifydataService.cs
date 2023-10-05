@@ -1,19 +1,19 @@
 using System.Net;
+using System.Net.Http.Headers;
 using Application.Interface;
 using Domain.Entities;
 
 namespace Infrastructure.Services;
 
-public class SpotifydataService : ISpotifyDataService
+public class SpotifyDataService : ISpotifyDataService
 {
-    private readonly SpotifyTokenService _tokenService;
+    private readonly ISpotifyTokenService _tokenService;
     private readonly HttpClient _httpClient;
-    private string spootifyBaseUrl = "https://api.spotify.com/v1/";
+    private string spotifyBaseUrl = "https://api.spotify.com/v1/";
     // private ClientDetail spotifyDetails;
     private SpotifyTokentoReturn token = new SpotifyTokentoReturn();
-    public SpotifydataService(SpotifyTokenService tokenService, HttpClient httpClient)
+    public SpotifyDataService( HttpClient httpClient)
     {
-        _tokenService = tokenService;
         _httpClient = httpClient;
     }
     // public ClientDetail Details
@@ -25,21 +25,33 @@ public class SpotifydataService : ISpotifyDataService
     //     }
     // }
 
-    public string AccessToken
+    // public string AccessToken
+    // {
+    //     get
+    //     {
+    //         if (token.IsValid || _tokenService.ReturnAccessTokenFromRefreshToken().Result)
+    //         { return token.AccessToken; }
+    //         return _tokenService.
+    //     }
+    // }
+
+    //get token from db
+    // check if db token is valid, if nto refresh and get a new one
+    // assign it to value. 
+
+    
+    public async Task<SpotifyUser> GetUserInfo()
     {
-        get
-        {
-            if (token.IsValid || _tokenService.ReturnAccessTokenFromRefreshToken().Result)
-            { return token.AccessToken; }
-            return _tokenService.AccessToken;
-        }
-    }
-    public Task<SpotifyUser> GetUserInfo()
-    {
-        if(string.IsNullOrEmpty(AccessToken))
-        {
-            throw new ArgumentNullException("No access token available");
-        }
+        // if(string.IsNullOrEmpty(AccessToken))
+        // {
+        //     throw new ArgumentException();
+        // }
+
+        // HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"{spotifyBaseUrl}/me");
+        // request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
+
+        // var response = await _httpClient.SendAsync(request, CancellationToken.None).ConfigureAwait(false);
+
 
         throw new NotImplementedException();
     }
