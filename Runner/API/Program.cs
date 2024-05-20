@@ -23,9 +23,8 @@ builder.Services.AddCors( options => {
 });
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddScoped<ISpotifyLogin, SpotifyLogin>();
-builder.Services.AddScoped<ISpotifyTokenService, SpotifyTokenService>();
-builder.Services.AddHttpClient<ISpotifyLogin, SpotifyLogin>();
+
+builder.Services.AddHttpClient<ISpotifyAuthService, SpotifyAuthService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

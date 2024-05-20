@@ -7,7 +7,6 @@ namespace Infrastructure.Services;
 
 public class SpotifyDataService : ISpotifyDataService
 {
-    private readonly ISpotifyTokenService _tokenService;
     private readonly HttpClient _httpClient;
     private string spotifyBaseUrl = "https://api.spotify.com/v1/";
     // private ClientDetail spotifyDetails;
@@ -53,9 +52,9 @@ public class SpotifyDataService : ISpotifyDataService
         // var response = await _httpClient.SendAsync(request, CancellationToken.None).ConfigureAwait(false);
 
 
-        HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{spotifyBaseUrl}/me");
+        // HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{spotifyBaseUrl}/me");
 
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
+        // requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
 
 
         throw new NotImplementedException();
