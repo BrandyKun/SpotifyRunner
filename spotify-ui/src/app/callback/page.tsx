@@ -10,7 +10,7 @@ type ResponseAuth = {
   expires_in: number;
 };
 
-const page = () => {
+const Page = () => {
   const [redirectparams, setUrl] = useState<ResponseAuth | null>();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -18,7 +18,7 @@ const page = () => {
   useEffect(() => {
     // console.log(searchParams.toString());
     if (searchParams) {
-      fetch(`http://localhost:5039/auth/callback?${searchParams.toString()}`, {
+      fetch(`https://localhost:7289/api/auth/callback?${searchParams.toString()}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -39,4 +39,4 @@ const page = () => {
   return <div>Callback</div>;
 };
 
-export default page;
+export default Page;
