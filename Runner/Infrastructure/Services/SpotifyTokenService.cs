@@ -7,14 +7,19 @@ public class SpotifyTokenService
 {
     private readonly ISpotifyAuthService _spotifyAuthService;
     private SpotifyToken _currenttoken;
+    private readonly SpotifyDbContext _context;
 
-    public SpotifyTokenService(ISpotifyAuthService spotifyAuthService)
+    public SpotifyTokenService(ISpotifyAuthService spotifyAuthService, SpotifyDbContext context)
     {
+        _context = context;
         _spotifyAuthService = spotifyAuthService;
     }
 
     public async Task<SpotifyToken> GetOrRefreshToken(string code = null)
     {
+
+        _currenttoken = _context.SpotifyTokens.FirstOrDefault() ?? new SpotifyToken();
+        
         if (_currenttoken == null || _currenttoken.ExpiryTime <= DateTime.UtcNow)
         {
             if (_currenttoken == null && !String.IsNullOrEmpty(code))

@@ -8,11 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddOptions();
-var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
-builder.Services.AddTransient<SpotifyTokenService>();
-builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<ISpotifyAuthService, SpotifyAuthService>();
+builder.Services.Configure<SpotifySettings>(builder.Configuration.GetSection("Spotify"));
 builder.Services.AddDbContext<SpotifyDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSql")));
+
 builder.Services.AddCors( options => {
     options.AddPolicy(name: "NextPolicy", 
     policy => {
@@ -25,7 +26,6 @@ builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<ISpotifyAuthService, SpotifyAuthService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
