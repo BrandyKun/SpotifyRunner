@@ -74,7 +74,7 @@ public class SpotifyAuthService : ISpotifyAuthService
                 new KeyValuePair<string, string>("refresh_token", refreshToken),
                 new KeyValuePair<string, string>("client_id", clientId),
                 new KeyValuePair<string, string>("client_secret", clientSecret)
-            });
+        });
 
         var httpClient = _httpClientFactory.CreateClient();
         var tokenResponse = await httpClient.SendAsync(tokenRequest);

@@ -1,6 +1,7 @@
 using Application.Interface;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using SpotifyAPI.Web;
 
 namespace API.Controllers;
 
@@ -17,7 +18,7 @@ public class SpotifyController : ControllerBase
     }
 
     [HttpGet("user")]
-    public async Task<SpotifyUser> GetUser()
+    public async Task<PublicUser> GetUser()
     {
         var user = await _spotifyService.GetUserInfo();
         return user;

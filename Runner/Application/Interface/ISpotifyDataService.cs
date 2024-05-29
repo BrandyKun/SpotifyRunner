@@ -1,8 +1,10 @@
-using Domain.Entities;
+using Domain.Entities.UserEntities;
+using SpotifyAPI.Web;
 
 namespace Application.Interface;
 
 public interface ISpotifyDataService
 {
-    Task<SpotifyUser> GetUserInfo();
+    Task<PrivateUser> GetUserProfile();
+    Task<PublicUser> GetUserInfo();
 }

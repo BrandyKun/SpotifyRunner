@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOptions();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<ISpotifyAuthService, SpotifyAuthService>();
+builder.Services.AddScoped<ISpotifyDataService, SpotifyDataService>();
 builder.Services.Configure<SpotifySettings>(builder.Configuration.GetSection("Spotify"));
 builder.Services.AddDbContext<SpotifyDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSql")));

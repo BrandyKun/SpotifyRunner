@@ -1,4 +1,4 @@
-namespace Domain.Entities;
+namespace Domain.Entities.UserEntities;
 
 public class SpotifyUser
 {
@@ -7,8 +7,9 @@ public class SpotifyUser
     public string? DisplayName { get; set; } = default;
     public string? Email { get; set; } =default;
     public Follower? follower { get; set; }
+    public SpotifyContent? ExplicitContent { get; set; }
     public string? Url { get; set; }
-    public SpotifyImage? Image { get; set; }
+    public SpotifyImage[]? Image { get; set; }
     public string? Type { get; set; }
     public string? Product { get; set; }
     public string? URI { get; set; }
