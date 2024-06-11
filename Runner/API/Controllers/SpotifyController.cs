@@ -23,4 +23,11 @@ public class SpotifyController : ControllerBase
         var user = await _spotifyService.GetUserInfo();
         return user;
     }
+
+    [HttpGet("playlists")]
+    public async Task<IEnumerable<FullPlaylist>> GetUserPlaylist(){
+        
+        var playlists = await _spotifyService.GetAllUsersPlaylist();
+        return playlists;
+    }
 }
